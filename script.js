@@ -112,6 +112,68 @@ document.addEventListener('DOMContentLoaded', () => {
                     correcoes: [600000, 400000, 150000, 50000],
                 }
             },
+            dadosGeograficos: {
+                kpis: {
+                    qtdBairros: 45,
+                    qtdDistritos: 8,
+                    arrecadacaoRural: 15000000,
+                    arrecadacaoUrbana: 63550000,
+                },
+                arrecadacaoPorBairro: {
+                    labels: ['Centro', 'Bairro Novo', 'Industrial', 'Jardim Primavera', 'Setor Leste', 'Vila Real', 'Centro Histórico', 'Água Branca', 'Nova Cidade', 'Santa Clara'],
+                    valores: [15000000, 12000000, 9500000, 8200000, 6800000, 5500000, 4100000, 3500000, 2800000, 2500000],
+                },
+                arrecadacaoPorZona: {
+                    labels: ['Urbana', 'Rural'],
+                    valores: [63550000, 15000000],
+                    quantidades: [68000, 13300]
+                },
+                damsBairro: {
+                    labels: ['Centro', 'Bairro Novo', 'Industrial', 'Jardim Primavera', 'Setor Leste'],
+                    emitidos: [18000, 15000, 11000, 9500, 8000],
+                    arrecadados: [16500, 13800, 9800, 8800, 7500],
+                },
+                arrecadacaoPorSetor: {
+                    labels: ['Comércio e Serviços', 'Indústria', 'Imobiliário', 'Agropecuária', 'Outros'],
+                    valores: [35000000, 25000000, 10000000, 5000000, 3550000],
+                },
+                arrecadacaoPorDistrito: {
+                    labels: ['Distrito Central', 'Distrito Norte', 'Distrito Sul', 'Distrito Leste', 'Distrito Oeste', 'Distrito Rural 1', 'Distrito Rural 2', 'Distrito Rural 3'],
+                    valores: [25000000, 18000000, 15000000, 10000000, 5550000, 2500000, 2000000, 5000000],
+                },
+            },
+            dividaAtiva: {
+                kpis: {
+                    damsArrecadados: 12500,
+                    valorArrecadado: 12500000,
+                    contribuintesArrecadados: 8500
+                },
+                arrecadacaoAnual: {
+                    labels: ['2020', '2021', '2022', '2023', '2024'],
+                    valores: [1800000, 2500000, 3800000, 4500000, 12500000],
+                },
+                contribuintesAnual: {
+                    labels: ['2020', '2021', '2022', '2023', '2024'],
+                    quantidades: [1200, 1800, 2500, 3000, 8500],
+                }
+            },
+            extratos: {
+                kpis: {
+                    extratosEmitidos: 250000,
+                    extratosBaixados: 195000,
+                    valorEmitido: 155000000,
+                    valorArrecadado: 132000000,
+                },
+                evolucaoMensal: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                    emitidos: [40000, 42000, 45000, 35000, 48000, 40000],
+                    arrecadados: [32000, 35000, 38000, 28000, 40000, 35000],
+                },
+                statusValor: {
+                    labels: ['Valor Emitido', 'Valor Arrecadado'],
+                    valores: [155000000, 132000000],
+                }
+            },
             dams: {
                 '11.222.333/0001-44': [
                     { dam: '#2825003', tributo: 'ISS', parcela: '1/3', multa: 80000, juros: 9820, correcao: 1000, desconto: 0, total: 890200 },
@@ -255,6 +317,29 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('kpi-correcao-banco').textContent = formatCurrency(data.kpis.valorCorrecaoPorBanco);
     };
 
+    // Função para atualizar os KPIs de Análise Geográfica
+    const updateKpisGeograficos = (data) => {
+        document.getElementById('kpi-qtd-bairros').textContent = formatNumber(data.kpis.qtdBairros);
+        document.getElementById('kpi-qtd-distritos').textContent = formatNumber(data.kpis.qtdDistritos);
+        document.getElementById('kpi-arrecadacao-rural').textContent = formatCurrency(data.kpis.arrecadacaoRural);
+        document.getElementById('kpi-arrecadacao-urbana').textContent = formatCurrency(data.kpis.arrecadacaoUrbana);
+    };
+    
+    // Função para atualizar os KPIs de Dívida Ativa
+    const updateKpisDividaAtiva = (data) => {
+        document.getElementById('kpi-da-dams-arrecadados').textContent = formatNumber(data.kpis.damsArrecadados);
+        document.getElementById('kpi-da-valor-arrecadado').textContent = formatCurrency(data.kpis.valorArrecadado);
+        document.getElementById('kpi-da-contribuintes').textContent = formatNumber(data.kpis.contribuintesArrecadados);
+    };
+    
+    // Função para atualizar os KPIs de Extratos
+    const updateKpisExtratos = (data) => {
+        document.getElementById('kpi-extratos-emitidos').textContent = formatNumber(data.kpis.extratosEmitidos);
+        document.getElementById('kpi-extratos-baixados').textContent = formatNumber(data.kpis.extratosBaixados);
+        document.getElementById('kpi-extratos-valor-emitido').textContent = formatCurrency(data.kpis.valorEmitido);
+        document.getElementById('kpi-extratos-valor-arrecadado').textContent = formatCurrency(data.kpis.valorArrecadado);
+    };
+
     // Função principal para atualizar o painel
     const updateDashboard = (data) => {
         const kpisGerais = [
@@ -281,9 +366,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         updateContribuinteKpis(data.contribuinteAnalytics);
         populateRankingTable('top-10-adimplentes-tbody', data.contribuinteAnalytics.topAdimplentes);
-
-        // Chamar a função para atualizar os novos KPIs
         updateKpisBancarios(data.dadosBancarios);
+        updateKpisGeograficos(data.dadosGeograficos);
+        // Chamar as novas funções de atualização
+        updateKpisDividaAtiva(data.dividaAtiva);
+        updateKpisExtratos(data.extratos);
     };
 
     // Inicializa todos os gráficos
@@ -314,9 +401,18 @@ document.addEventListener('DOMContentLoaded', () => {
             pfVsPjChart: { type: 'bar', options: { ...defaultOptions(), indexAxis: 'y' } },
             porteChart: { type: 'doughnut', options: defaultOptions(true) },
             evolucaoTipoContribuinteChart: { type: 'line', options: defaultOptions(true) },
-            // Novos gráficos para a seção de Dados Bancários
             arrecadacaoPorBancoChart: { type: 'bar', options: { ...defaultOptions(true), scales: { 'y-valor': { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: (v) => formatCurrency(v) } }, 'y-quantidade': { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } } } } },
-            valoresAdicionaisPorBancoChart: { type: 'bar', options: defaultOptions(true) }
+            valoresAdicionaisPorBancoChart: { type: 'bar', options: defaultOptions(true) },
+            arrecadacaoPorBairroChart: { type: 'bar', options: defaultOptions(true) },
+            arrecadacaoPorZonaChart: { type: 'doughnut', options: defaultOptions(true) },
+            damsBairroChart: { type: 'bar', options: defaultOptions() },
+            arrecadacaoPorSetorChart: { type: 'pie', options: defaultOptions(true) },
+            arrecadacaoPorDistritoChart: { type: 'bar', options: defaultOptions(true) },
+            // Novos gráficos
+            arrecadacaoDAChart: { type: 'line', options: defaultOptions(true) },
+            contribuintesDAChart: { type: 'bar', options: defaultOptions() },
+            evolucaoExtratosChart: { type: 'line', options: defaultOptions() },
+            extratosStatusValorChart: { type: 'doughnut', options: defaultOptions(true) },
         };
 
         for (const [id, config] of Object.entries(chartConfigs)) {
@@ -327,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Atualiza os dados de todos os gráficos
     const updateCharts = (data) => {
-        const { kpis, analytics, contribuinteAnalytics, dadosBancarios } = data;
+        const { kpis, analytics, contribuinteAnalytics, dadosBancarios, dadosGeograficos, dividaAtiva, extratos } = data;
         const colors = { sky: '#0ea5e9', green: '#10b981', red: '#ef4444', orange: '#f97316', purple: '#8b5cf6', teal: '#14b8a6', yellow: '#eab308', indigo: '#4f46e5', blue: '#3b82f6' };
 
         charts.totalValuesChart.data = {
@@ -403,8 +499,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]
             };
         }
-
-        // Novos gráficos de Dados Bancários
         if (charts.arrecadacaoPorBancoChart) {
             charts.arrecadacaoPorBancoChart.data = {
                 labels: dadosBancarios.arrecadacaoPorBanco.labels,
@@ -414,7 +508,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]
             };
         }
-
         if (charts.valoresAdicionaisPorBancoChart) {
              charts.valoresAdicionaisPorBancoChart.data = {
                 labels: dadosBancarios.valoresAdicionaisPorBanco.labels,
@@ -423,6 +516,76 @@ document.addEventListener('DOMContentLoaded', () => {
                     { label: 'Juros', data: dadosBancarios.valoresAdicionaisPorBanco.juros, backgroundColor: colors.red },
                     { label: 'Correção Monetária', data: dadosBancarios.valoresAdicionaisPorBanco.correcoes, backgroundColor: colors.purple },
                 ]
+            };
+        }
+        
+        if (charts.arrecadacaoPorBairroChart) {
+            charts.arrecadacaoPorBairroChart.data = {
+                labels: dadosGeograficos.arrecadacaoPorBairro.labels,
+                datasets: [{ label: 'Valor Arrecadado (R$)', data: dadosGeograficos.arrecadacaoPorBairro.valores, backgroundColor: colors.blue, barPercentage: 0.6 }]
+            };
+        }
+
+        if (charts.arrecadacaoPorZonaChart) {
+             charts.arrecadacaoPorZonaChart.data = {
+                labels: dadosGeograficos.arrecadacaoPorZona.labels,
+                datasets: [{ label: 'Valor Arrecadado (R$)', data: dadosGeograficos.arrecadacaoPorZona.valores, backgroundColor: [colors.indigo, colors.teal] }]
+            };
+        }
+
+        if (charts.damsBairroChart) {
+             charts.damsBairroChart.data = {
+                labels: dadosGeograficos.damsBairro.labels,
+                datasets: [
+                    { label: 'DAMs Emitidos', data: dadosGeograficos.damsBairro.emitidos, backgroundColor: colors.sky },
+                    { label: 'DAMs Arrecadados', data: dadosGeograficos.damsBairro.arrecadados, backgroundColor: colors.green },
+                ]
+            };
+        }
+
+        if (charts.arrecadacaoPorSetorChart) {
+             charts.arrecadacaoPorSetorChart.data = {
+                labels: dadosGeograficos.arrecadacaoPorSetor.labels,
+                datasets: [{ data: dadosGeograficos.arrecadacaoPorSetor.valores, backgroundColor: [colors.teal, colors.indigo, colors.yellow, colors.green, colors.gray] }]
+            };
+        }
+
+        if (charts.arrecadacaoPorDistritoChart) {
+             charts.arrecadacaoPorDistritoChart.data = {
+                labels: dadosGeograficos.arrecadacaoPorDistrito.labels,
+                datasets: [{ label: 'Valor Arrecadado (R$)', data: dadosGeograficos.arrecadacaoPorDistrito.valores, backgroundColor: colors.purple, barPercentage: 0.6 }]
+            };
+        }
+        
+        // Novos gráficos
+        if (charts.arrecadacaoDAChart) {
+            charts.arrecadacaoDAChart.data = {
+                labels: dividaAtiva.arrecadacaoAnual.labels,
+                datasets: [{ label: 'Valor Arrecadado (R$)', data: dividaAtiva.arrecadacaoAnual.valores, borderColor: colors.red, tension: 0.3, fill: true, backgroundColor: `${colors.red}20` }]
+            };
+        }
+
+        if (charts.contribuintesDAChart) {
+            charts.contribuintesDAChart.data = {
+                labels: dividaAtiva.contribuintesAnual.labels,
+                datasets: [{ label: 'Quantidade de Contribuintes', data: dividaAtiva.contribuintesAnual.quantidades, backgroundColor: colors.red }]
+            };
+        }
+        
+        if (charts.evolucaoExtratosChart) {
+            charts.evolucaoExtratosChart.data = {
+                labels: extratos.evolucaoMensal.labels,
+                datasets: [
+                    { label: 'Extratos Emitidos', data: extratos.evolucaoMensal.emitidos, borderColor: colors.sky, tension: 0.3 },
+                    { label: 'Extratos Baixados', data: extratos.evolucaoMensal.arrecadados, borderColor: colors.green, tension: 0.3 },
+                ]
+            };
+        }
+        
+        if (charts.extratosStatusValorChart) {
+            charts.extratosStatusValorChart.data = {
+                labels: extratos.statusValor.labels,
+                datasets: [{ data: extratos.statusValor.valores, backgroundColor: [colors.sky, colors.green] }]
             };
         }
 
@@ -513,7 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const closeContribuinteModal = () => {
-        contribuinteModal.classList.remove('visible');
+    contribuinteModal.classList.remove('visible');
     };
 
     // -- EVENT LISTENERS --
