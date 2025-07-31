@@ -94,11 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
             dadosBancarios: {
                 kpis: {
                     valorTarifaTotal: 150000,
-                    // Custo Percentual = (Valor Total Bruto Arrecadado / Valor Total da Tarifa de Cobrança) * 100
                     custoPercentual: (150000 / 78550000) * 100,
-                    valorMultaPorBanco: 850000, // Valor total de multa já está no kpis.multas
-                    valorJurosPorBanco: 1200000, // Valor total de juros já está no kpis.juros
-                    valorCorrecaoPorBanco: 1200000, // Valor total de correção já está no kpis.correcaoMonetaria
+                    valorMultaPorBanco: 850000,
+                    valorJurosPorBanco: 1200000,
+                    valorCorrecaoPorBanco: 1200000,
                 },
                 arrecadacaoPorBanco: {
                     labels: ['Banco do Brasil', 'Caixa Econômica', 'Itaú', 'Outros'],
@@ -190,13 +189,11 @@ document.addEventListener('DOMContentLoaded', () => {
         },
     };
 
-    // Cria um card de KPI
     const createKpiCard = (kpi) => {
         const color = kpi.color || 'sky';
         return `<div class="kpi-card"><div class="kpi-icon-wrapper bg-${color}-100"><i class="fa-solid ${kpi.icon} text-${color}-600"></i></div><div><div class="kpi-label">${kpi.label}</div><div class="kpi-value">${kpi.value}</div></div></div>`;
     };
 
-    // Popula a tabela de rankings
     const populateRankingTable = (tableId, data) => {
         const tableBody = document.getElementById(tableId);
         if (!tableBody) return;
@@ -220,7 +217,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Popula a tabela de faixas de valor
     const populateAngelistTable = (data) => {
         const tableBody = document.getElementById('faixas-valor-tbody');
         if (!tableBody) return;
@@ -236,7 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Atualiza a barra de informações com os filtros aplicados
     const updateInfoBar = () => {
         const infoBar = document.getElementById('info-bar');
         const form = document.getElementById('filtro-form');
@@ -285,7 +280,6 @@ document.addEventListener('DOMContentLoaded', () => {
         infoBar.innerHTML = content;
     };
 
-    // Atualiza os KPIs de contribuinte
     const updateContribuinteKpis = (data) => {
         const kpiContainer = document.getElementById('kpi-contribuinte');
         if (!kpiContainer) return;
@@ -308,7 +302,6 @@ document.addEventListener('DOMContentLoaded', () => {
         kpiContainer.innerHTML = kpisContribuinte.map((kpi, i) => createKpiCard({ ...kpi, delay: i })).join('');
     };
 
-    // Função para atualizar os KPIs de Dados Bancários
     const updateKpisBancarios = (data) => {
         document.getElementById('kpi-tarifa-total').textContent = formatCurrency(data.kpis.valorTarifaTotal);
         document.getElementById('kpi-custo-percentual').textContent = `${data.kpis.custoPercentual.toFixed(2)}%`;
@@ -317,7 +310,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('kpi-correcao-banco').textContent = formatCurrency(data.kpis.valorCorrecaoPorBanco);
     };
 
-    // Função para atualizar os KPIs de Análise Geográfica
     const updateKpisGeograficos = (data) => {
         document.getElementById('kpi-qtd-bairros').textContent = formatNumber(data.kpis.qtdBairros);
         document.getElementById('kpi-qtd-distritos').textContent = formatNumber(data.kpis.qtdDistritos);
@@ -325,14 +317,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('kpi-arrecadacao-urbana').textContent = formatCurrency(data.kpis.arrecadacaoUrbana);
     };
     
-    // Função para atualizar os KPIs de Dívida Ativa
     const updateKpisDividaAtiva = (data) => {
         document.getElementById('kpi-da-dams-arrecadados').textContent = formatNumber(data.kpis.damsArrecadados);
         document.getElementById('kpi-da-valor-arrecadado').textContent = formatCurrency(data.kpis.valorArrecadado);
         document.getElementById('kpi-da-contribuintes').textContent = formatNumber(data.kpis.contribuintesArrecadados);
     };
     
-    // Função para atualizar os KPIs de Extratos
     const updateKpisExtratos = (data) => {
         document.getElementById('kpi-extratos-emitidos').textContent = formatNumber(data.kpis.extratosEmitidos);
         document.getElementById('kpi-extratos-baixados').textContent = formatNumber(data.kpis.extratosBaixados);
@@ -340,7 +330,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('kpi-extratos-valor-arrecadado').textContent = formatCurrency(data.kpis.valorArrecadado);
     };
 
-    // Função principal para atualizar o painel
     const updateDashboard = (data) => {
         const kpisGerais = [
             { label: 'DAMs Arrecadados', value: formatNumber(data.kpis.damsArrecadados), icon: 'fa-file-invoice', color: 'green' },
@@ -368,12 +357,10 @@ document.addEventListener('DOMContentLoaded', () => {
         populateRankingTable('top-10-adimplentes-tbody', data.contribuinteAnalytics.topAdimplentes);
         updateKpisBancarios(data.dadosBancarios);
         updateKpisGeograficos(data.dadosGeograficos);
-        // Chamar as novas funções de atualização
         updateKpisDividaAtiva(data.dividaAtiva);
         updateKpisExtratos(data.extratos);
     };
 
-    // Inicializa todos os gráficos
     const initCharts = () => {
         Chart.defaults.font.family = "'Inter', sans-serif";
         const defaultOptions = (isCurrency = false) => ({
@@ -408,7 +395,6 @@ document.addEventListener('DOMContentLoaded', () => {
             damsBairroChart: { type: 'bar', options: defaultOptions() },
             arrecadacaoPorSetorChart: { type: 'pie', options: defaultOptions(true) },
             arrecadacaoPorDistritoChart: { type: 'bar', options: defaultOptions(true) },
-            // Novos gráficos
             arrecadacaoDAChart: { type: 'line', options: defaultOptions(true) },
             contribuintesDAChart: { type: 'bar', options: defaultOptions() },
             evolucaoExtratosChart: { type: 'line', options: defaultOptions() },
@@ -421,7 +407,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Atualiza os dados de todos os gráficos
     const updateCharts = (data) => {
         const { kpis, analytics, contribuinteAnalytics, dadosBancarios, dadosGeograficos, dividaAtiva, extratos } = data;
         const colors = { sky: '#0ea5e9', green: '#10b981', red: '#ef4444', orange: '#f97316', purple: '#8b5cf6', teal: '#14b8a6', yellow: '#eab308', indigo: '#4f46e5', blue: '#3b82f6' };
@@ -557,7 +542,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
         
-        // Novos gráficos
         if (charts.arrecadacaoDAChart) {
             charts.arrecadacaoDAChart.data = {
                 labels: dividaAtiva.arrecadacaoAnual.labels,
@@ -592,7 +576,6 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.values(charts).forEach(chart => chart.update());
     };
 
-    // -- LÓGICA DAS MODAIS --
     const chartModal = document.getElementById('chart-modal');
     const modalContent = document.getElementById('modal-content');
     const chartModalCloseBtn = document.getElementById('modal-close-btn');
@@ -601,20 +584,106 @@ document.addEventListener('DOMContentLoaded', () => {
     const contribuinteModal = document.getElementById('contribuinte-modal');
     const contribuinteModalCloseBtn = document.getElementById('contribuinte-modal-close-btn');
 
+    // --- FUNÇÃO CORRIGIDA E ROBUSTA ---
+    const generateModalTable = (originalChart) => {
+        const { data, config } = originalChart;
+        const type = config.type;
+
+        let tableHTML = '<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr>';
+        let headers = [];
+        let rowsHTML = '';
+
+        try {
+            if (!data || !data.datasets || data.datasets.length === 0) {
+                throw new Error("Dados do gráfico ausentes ou inválidos.");
+            }
+
+            if (type === 'scatter') {
+                headers = ['Dias em Atraso', 'Valor (R$)'];
+                headers.forEach(h => tableHTML += `<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${h}</th>`);
+                tableHTML += '</tr></thead><tbody class="bg-white divide-y divide-gray-200">';
+                
+                if (data.datasets[0] && data.datasets[0].data) {
+                    data.datasets[0].data.forEach(point => {
+                        rowsHTML += `<tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">${point.x}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">${formatCurrency(point.y)}</td>
+                        </tr>`;
+                    });
+                }
+            } else if (type === 'pie' || type === 'doughnut') {
+                headers = ['Categoria', 'Valor'];
+                headers.forEach(h => tableHTML += `<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${h}</th>`);
+                tableHTML += '</tr></thead><tbody class="bg-white divide-y divide-gray-200">';
+                
+                if (data.labels && data.datasets[0] && data.datasets[0].data) {
+                    // Heurística simples para decidir se os dados são monetários
+                    const isCurrencyData = data.datasets[0].data.some(v => v > 1000) && !originalChart.options.plugins?.tooltip?.enabled === false;
+                    data.labels.forEach((label, index) => {
+                        const value = data.datasets[0].data[index];
+                        const formattedValue = isCurrencyData ? formatCurrency(value) : formatNumber(value);
+                        rowsHTML += `<tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${label}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">${formattedValue}</td>
+                        </tr>`;
+                    });
+                }
+            } else { // Para gráficos de Barra, Linha, etc.
+                if (!data.labels) throw new Error("Rótulos (labels) ausentes para este tipo de gráfico.");
+
+                headers = ['Categoria', ...data.datasets.map(d => d.label || '')];
+                headers.forEach(h => tableHTML += `<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${h}</th>`);
+                tableHTML += '</tr></thead><tbody class="bg-white divide-y divide-gray-200">';
+                
+                data.labels.forEach((label, index) => {
+                    let row = `<tr><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${label}</td>`;
+                    data.datasets.forEach(dataset => {
+                        const value = dataset.data[index];
+                        const labelLower = (dataset.label || '').toLowerCase();
+                        let formattedValue;
+
+                        if (labelLower.includes('taxa') || labelLower.includes('%')) {
+                            formattedValue = `${formatNumber(value)}%`;
+                        } else if (labelLower.includes('valor') || labelLower.includes('r$')) {
+                            formattedValue = formatCurrency(value);
+                        } else {
+                            formattedValue = formatNumber(value);
+                        }
+                        row += `<td class="px-6 py-4 whitespace-nowrap text-sm">${formattedValue}</td>`;
+                    });
+                    row += '</tr>';
+                    rowsHTML += row;
+                });
+            }
+            tableHTML += rowsHTML + '</tbody></table>';
+        } catch (e) {
+            console.error("Erro ao gerar tabela para o gráfico:", originalChart.canvas.id, e);
+            tableHTML = `<div class="p-4 text-center text-red-500">Ocorreu um erro ao gerar a tabela de dados.</div>`;
+        }
+
+        modalTableContainer.innerHTML = tableHTML;
+    };
+
+
     const openChartModal = (chartId) => {
         const originalChart = charts[chartId];
         if (!originalChart) return;
+
         const chartTitleElement = document.querySelector(`[data-chart-id="${chartId}"]`);
         const chartTitleText = chartTitleElement.closest('.chart-article').querySelector('.chart-title span').textContent;
         modalTitle.textContent = chartTitleText;
+
         const modalCanvas = document.getElementById('modal-chart');
         if (modalChart) modalChart.destroy();
+
         modalChart = new Chart(modalCanvas, {
             type: originalChart.config.type,
-            data: JSON.parse(JSON.stringify(originalChart.data)), // Deep copy
+            data: JSON.parse(JSON.stringify(originalChart.data)),
             options: { ...originalChart.options, maintainAspectRatio: false }
         });
-        generateModalTable(originalChart.data, originalChart.options);
+        
+        generateModalTable(originalChart);
+        
         chartModal.classList.add('visible');
     };
 
@@ -624,28 +693,6 @@ document.addEventListener('DOMContentLoaded', () => {
             modalChart.destroy();
             modalChart = null;
         }
-    };
-
-    const generateModalTable = (data, options) => {
-        let tableHTML = '<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr>';
-        const headers = ['Categoria', ...data.datasets.map(d => d.label)];
-        headers.forEach(h => tableHTML += `<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${h}</th>`);
-        tableHTML += '</tr></thead><tbody class="bg-white divide-y divide-gray-200">';
-        
-        data.labels.forEach((label, index) => {
-            tableHTML += `<tr><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${label}</td>`;
-            data.datasets.forEach(dataset => {
-                const value = dataset.data[index];
-                const rawValue = typeof value === 'object' && value !== null ? value.y : value;
-                const isCurrency = (dataset.label && (dataset.label.toLowerCase().includes('valor') || dataset.label.toLowerCase().includes('r$')));
-                const formattedValue = !isNaN(rawValue) ? (isCurrency ? formatCurrency(rawValue) : formatNumber(rawValue)) : rawValue;
-                tableHTML += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedValue}</td>`;
-            });
-            tableHTML += '</tr>';
-        });
-        
-        tableHTML += '</tbody></table>';
-        modalTableContainer.innerHTML = tableHTML;
     };
 
     const openContribuinteModal = (cnpjCpf, nome) => {
@@ -676,10 +723,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const closeContribuinteModal = () => {
-    contribuinteModal.classList.remove('visible');
+        contribuinteModal.classList.remove('visible');
     };
 
-    // -- EVENT LISTENERS --
     document.getElementById('filtro-form').addEventListener('submit', (e) => {
         e.preventDefault();
         updateDashboard(mockData[currentDataKey]);
@@ -689,17 +735,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('filtros-avancados').classList.toggle('hidden');
     });
 
-    // Event listener delegado para todos os cliques dentro do <main>
     document.querySelector('main').addEventListener('click', (e) => {
-        // Verifica se o clique foi em um botão de detalhes de gráfico
         const detailsButton = e.target.closest('.details-btn');
         if (detailsButton) {
             const chartId = detailsButton.dataset.chartId;
             if (chartId) openChartModal(chartId);
             return;
         }
-
-        // Verifica se o clique foi em uma linha de tabela clicável
         const clickableRow = e.target.closest('.table-row-clickable');
         if (clickableRow && clickableRow.dataset.cnpjCpf) {
             openContribuinteModal(clickableRow.dataset.cnpjCpf, clickableRow.dataset.nome);
@@ -717,7 +759,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === contribuinteModal) closeContribuinteModal();
     });
 
-    // -- INICIALIZAÇÃO --
     initCharts();
     updateDashboard(mockData[currentDataKey]);
 });
