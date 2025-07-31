@@ -76,19 +76,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // **LISTA COMPLETA DE KPIs RESTAURADA E REORDENADA**
         const kpisGerais = [
             // Ordem ajustada conforme solicitado
-            { label: 'DAMs Arrecadados', value: `${formatNumber(data.kpis.damsArrecadados)} Qtd.`, icon: 'fa-file-invoice', color: 'green' },
+            { label: 'DAMs Arrecadados', value: `${formatNumber(data.kpis.damsArrecadados)} `, icon: 'fa-file-invoice', color: 'green' },
             { label: 'Valor Total Arrecadado', value: formatCurrency(data.kpis.valorArrecadado), icon: 'fa-sack-dollar', color: 'teal' },
-            { label: 'DAMs Emitidos', value: `${formatNumber(data.kpis.damsEmitidos)} Qtd.`, icon: 'fa-file-invoice-dollar', color: 'sky' },
+            { label: 'DAMs Emitidos', value: `${formatNumber(data.kpis.damsEmitidos)} `, icon: 'fa-file-invoice-dollar', color: 'sky' },
             { label: 'Valor Total Emitido', value: formatCurrency(data.kpis.valorEmitido), icon: 'fa-money-bill-wave', color: 'blue' },
             
             // KPIs originais restaurados
             { label: 'Taxa de Arrecadação', value: `${((data.kpis.valorArrecadado / data.kpis.valorEmitido) * 100).toFixed(1)}%`, icon: 'fa-percent', color: 'green' },
-            { label: 'Total Multa', value: formatCurrency(data.kpis.multas), icon: 'fa-file-circle-exclamation', color: 'red' },
+            { label: 'Total Multa de Mora', value: formatCurrency(data.kpis.multas), icon: 'fa-file-circle-exclamation', color: 'red' },
+            { label: 'Total Juros de Mora', value: formatCurrency(data.kpis.juros), icon: 'fa-hand-holding-dollar', color: 'yellow' },
             { label: 'Total Correção Monetária', value: formatCurrency(data.kpis.juros), icon: 'fa-coins', color: 'teal' },
-            { label: 'Total Desconto', value: formatCurrency(data.kpis.descontos), icon: 'fa-tag', color: 'yellow' },
-            { label: 'Total Juros', value: formatCurrency(data.kpis.juros), icon: 'fa-hand-holding-dollar', color: 'yellow' },
+            { label: 'Total Descontos Concedidos', value: formatCurrency(data.kpis.descontos), icon: 'fa-tag', color: 'yellow' },
             { label: 'Arrecadação Atualizada', value: formatCurrency(data.kpis.valorArrecadado + data.kpis.multas + data.kpis.juros), icon: 'fa-sack-xmark', color: 'red' },
-            { label: 'DAMs pago com Atraso', value: `${formatNumber(Math.abs(data.kpis.damsEmitidos - data.kpis.damsArrecadados))} Qtd.`, icon: 'fa-clock', color: 'orange' },
+            { label: 'DAMs pago em Atraso', value: `${formatNumber(Math.abs(data.kpis.damsEmitidos - data.kpis.damsArrecadados))} `, icon: 'fa-clock', color: 'orange' },
             { label: 'Média de atraso', value: `${Math.ceil(data.kpis.tma)} dias`, icon: 'fa-stopwatch', color: 'purple' },
         ];
         document.getElementById('kpi-gerais').innerHTML = kpisGerais.map((kpi, i) => createKpiCard({ ...kpi, delay: i })).join('');
