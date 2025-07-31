@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const formatNumber = (value) => new Intl.NumberFormat('pt-BR').format(value);
 
     // Dados fictícios (MOCK DATA) para demonstração.
-    // **AQUI VOCÊ IRÁ SUBSTITUIR PELA SUA LÓGICA DE BUSCA DE DADOS REAIS**
     const mockData = {
         arrecadacao2024: {
             kpis: {
@@ -49,6 +48,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     { nome: 'LOJA Q', cnpj_cpf: '333.444.555-66', total: 155.50 },
                 ],
             },
+            contribuinteAnalytics: {
+                qtdFisico: 18500,
+                valorFisico: 12500000,
+                qtdJuridico: 62800,
+                valorJuridico: 66050000,
+                topAdimplentes: [
+                    { nome: 'EMPRESA A LTDA', cnpj_cpf: '11.222.333/0001-44', total: 2500000 },
+                    { nome: 'SUPERMERCADO B S.A.', cnpj_cpf: '22.333.444/0001-55', total: 1800000 },
+                    { nome: 'INDÚSTRIA C', cnpj_cpf: '33.444.555/0001-66', total: 1265000 },
+                    { nome: 'HOSPITAL D', cnpj_cpf: '44.555.666/0001-77', total: 950000 },
+                    { nome: 'CONSTRUTORA E', cnpj_cpf: '55.666.777/0001-88', total: 880000 },
+                    { nome: 'UNIVERSIDADE F', cnpj_cpf: '66.777.888/0001-99', total: 760000 },
+                    { nome: 'LOGÍSTICA G', cnpj_cpf: '77.888.999/0001-00', total: 710000 },
+                    { nome: 'COMÉRCIO H', cnpj_cpf: '88.999.000/0001-11', total: 665000 },
+                    { nome: 'EMPRESA I', cnpj_cpf: '99.000.111/0001-22', total: 620000 },
+                    { nome: 'PESSOA FÍSICA ADIMPLENTE', cnpj_cpf: '111.222.333-44', total: 595000 },
+                ],
+                porte: {
+                    labels: ['MEI', 'Simples Nacional', 'Lucro Presumido', 'Lucro Real'],
+                    valores: [3500000, 22000000, 28550000, 12000000],
+                },
+                evolucaoTipo: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                    fisico: [2083333, 2083333, 2083333, 2083333, 2083333, 2083335],
+                    juridico: [11008333, 11008333, 11008333, 11008333, 11008333, 11008335],
+                }
+            },
             analytics: {
                 evolucaoMensal: {
                     labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
@@ -65,7 +91,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 valorVsAtraso: [ { x: 5, y: 350 }, { x: 35, y: 1500 }, { x: 65, y: 15000 } ],
                 damsStatusMensal: { labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'], emitidos: [15866, 15866, 15866, 15866, 15866, 15870], pagosDia: [9316, 9316, 9316, 9316, 9316, 9320], pagosAtraso: [4233, 4233, 4233, 4233, 4233, 4235], }
             },
-            // Dados fictícios de DAMs para a modal do contribuinte
+            dadosBancarios: {
+                kpis: {
+                    valorTarifaTotal: 150000,
+                    // Custo Percentual = (Valor Total Bruto Arrecadado / Valor Total da Tarifa de Cobrança) * 100
+                    custoPercentual: (150000 / 78550000) * 100,
+                    valorMultaPorBanco: 850000, // Valor total de multa já está no kpis.multas
+                    valorJurosPorBanco: 1200000, // Valor total de juros já está no kpis.juros
+                    valorCorrecaoPorBanco: 1200000, // Valor total de correção já está no kpis.correcaoMonetaria
+                },
+                arrecadacaoPorBanco: {
+                    labels: ['Banco do Brasil', 'Caixa Econômica', 'Itaú', 'Outros'],
+                    valores: [35000000, 28000000, 10000000, 5500000],
+                    quantidades: [40000, 30000, 8000, 3300],
+                },
+                valoresAdicionaisPorBanco: {
+                    labels: ['Banco do Brasil', 'Caixa Econômica', 'Itaú', 'Outros'],
+                    multas: [400000, 300000, 100000, 50000],
+                    juros: [550000, 450000, 150000, 50000],
+                    correcoes: [600000, 400000, 150000, 50000],
+                }
+            },
             dams: {
                 '11.222.333/0001-44': [
                     { dam: '#2825003', tributo: 'ISS', parcela: '1/3', multa: 80000, juros: 9820, correcao: 1000, desconto: 0, total: 890200 },
@@ -78,7 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     { dam: '#3456789', tributo: 'IPTU', parcela: '1/3', multa: 2000, juros: 1500, correcao: 500, desconto: 0, total: 880000 },
                     { dam: '#3456790', tributo: 'IPTU', parcela: '2/3', multa: 1500, juros: 1000, correcao: 400, desconto: 0, total: 750000 },
                 ]
-                // Adicione mais dados conforme necessário para os outros contribuintes
             }
         },
     };
@@ -89,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<div class="kpi-card"><div class="kpi-icon-wrapper bg-${color}-100"><i class="fa-solid ${kpi.icon} text-${color}-600"></i></div><div><div class="kpi-label">${kpi.label}</div><div class="kpi-value">${kpi.value}</div></div></div>`;
     };
 
-    // Popula a tabela de rankings (maiores e menores)
+    // Popula a tabela de rankings
     const populateRankingTable = (tableId, data) => {
         const tableBody = document.getElementById(tableId);
         if (!tableBody) return;
@@ -151,7 +196,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let content = '';
 
-        // Adiciona as datas
         const dataInicial = formData.get('data-inicial');
         const dataFinal = formData.get('data-final');
         if (dataInicial && dataFinal) {
@@ -179,6 +223,38 @@ document.addEventListener('DOMContentLoaded', () => {
         infoBar.innerHTML = content;
     };
 
+    // Atualiza os KPIs de contribuinte
+    const updateContribuinteKpis = (data) => {
+        const kpiContainer = document.getElementById('kpi-contribuinte');
+        if (!kpiContainer) return;
+
+        const totalValor = data.valorFisico + data.valorJuridico;
+        const percentualFisico = totalValor > 0 ? (data.valorFisico / totalValor) * 100 : 0;
+        const percentualJuridico = totalValor > 0 ? (data.valorJuridico / totalValor) * 100 : 0;
+
+        const kpisContribuinte = [
+            { label: 'Qtd. Pessoa Física', value: formatNumber(data.qtdFisico), icon: 'fa-user', color: 'blue' },
+            { label: 'Valor Pessoa Física', value: formatCurrency(data.valorFisico), icon: 'fa-wallet', color: 'sky' },
+            { label: '% Arrecadação P. Física', value: `${percentualFisico.toFixed(1)}%`, icon: 'fa-user-check', color: 'teal' },
+            { label: 'Qtd. Pessoa Jurídica', value: formatNumber(data.qtdJuridico), icon: 'fa-building', color: 'indigo' },
+            { label: 'Valor Pessoa Jurídica', value: formatCurrency(data.valorJuridico), icon: 'fa-sack-dollar', color: 'purple' },
+            { label: '% Arrecadação P. Jurídica', value: `${percentualJuridico.toFixed(1)}%`, icon: 'fa-building-check', color: 'green' },
+            { label: 'Quantidade Contribuinte Mobiliário', value: formatNumber(data.qtdJuridico), icon: 'fa-cash-register', color: 'slate' },
+            { label: 'Valor R$ Arrecadação Mobiliário', value: formatCurrency(data.valorJuridico), icon: 'fa-industry', color: 'slate' }
+        ];
+        
+        kpiContainer.innerHTML = kpisContribuinte.map((kpi, i) => createKpiCard({ ...kpi, delay: i })).join('');
+    };
+
+    // Função para atualizar os KPIs de Dados Bancários
+    const updateKpisBancarios = (data) => {
+        document.getElementById('kpi-tarifa-total').textContent = formatCurrency(data.kpis.valorTarifaTotal);
+        document.getElementById('kpi-custo-percentual').textContent = `${data.kpis.custoPercentual.toFixed(2)}%`;
+        document.getElementById('kpi-multa-banco').textContent = formatCurrency(data.kpis.valorMultaPorBanco);
+        document.getElementById('kpi-juros-banco').textContent = formatCurrency(data.kpis.valorJurosPorBanco);
+        document.getElementById('kpi-correcao-banco').textContent = formatCurrency(data.kpis.valorCorrecaoPorBanco);
+    };
+
     // Função principal para atualizar o painel
     const updateDashboard = (data) => {
         const kpisGerais = [
@@ -202,6 +278,12 @@ document.addEventListener('DOMContentLoaded', () => {
         populateRankingTable('top-10-maiores-tbody', data.rankings.topMaiores);
         populateRankingTable('top-10-menores-tbody', data.rankings.topMenores);
         updateInfoBar();
+        
+        updateContribuinteKpis(data.contribuinteAnalytics);
+        populateRankingTable('top-10-adimplentes-tbody', data.contribuinteAnalytics.topAdimplentes);
+
+        // Chamar a função para atualizar os novos KPIs
+        updateKpisBancarios(data.dadosBancarios);
     };
 
     // Inicializa todos os gráficos
@@ -228,7 +310,13 @@ document.addEventListener('DOMContentLoaded', () => {
             delayDistributionChart: { type: 'bar', options: defaultOptions() },
             revenueCompositionChart: { type: 'doughnut', options: defaultOptions(true) },
             valueVsDelayScatterChart: { type: 'scatter', options: { ...defaultOptions(true), scales: { x: { title: { display: true, text: 'Dias em Atraso' } }, y: { title: { display: true, text: 'Valor (R$)' } } } } },
-            monthlyDamStatusChart: { type: 'bar', options: { ...defaultOptions(), scales: { x: { stacked: true }, y: { stacked: true } } } }
+            monthlyDamStatusChart: { type: 'bar', options: { ...defaultOptions(), scales: { x: { stacked: true }, y: { stacked: true } } } },
+            pfVsPjChart: { type: 'bar', options: { ...defaultOptions(), indexAxis: 'y' } },
+            porteChart: { type: 'doughnut', options: defaultOptions(true) },
+            evolucaoTipoContribuinteChart: { type: 'line', options: defaultOptions(true) },
+            // Novos gráficos para a seção de Dados Bancários
+            arrecadacaoPorBancoChart: { type: 'bar', options: { ...defaultOptions(true), scales: { 'y-valor': { type: 'linear', position: 'left', beginAtZero: true, ticks: { callback: (v) => formatCurrency(v) } }, 'y-quantidade': { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } } } } },
+            valoresAdicionaisPorBancoChart: { type: 'bar', options: defaultOptions(true) }
         };
 
         for (const [id, config] of Object.entries(chartConfigs)) {
@@ -239,8 +327,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Atualiza os dados de todos os gráficos
     const updateCharts = (data) => {
-        const { kpis, analytics } = data;
-        const colors = { sky: '#0ea5e9', green: '#10b981', red: '#ef4444', orange: '#f97316', purple: '#8b5cf6', teal: '#14b8a6', yellow: '#eab308' };
+        const { kpis, analytics, contribuinteAnalytics, dadosBancarios } = data;
+        const colors = { sky: '#0ea5e9', green: '#10b981', red: '#ef4444', orange: '#f97316', purple: '#8b5cf6', teal: '#14b8a6', yellow: '#eab308', indigo: '#4f46e5', blue: '#3b82f6' };
 
         charts.totalValuesChart.data = {
             labels: ['Emitido', 'Arrecadado', 'Multas', 'Juros', 'Correção Monetária'],
@@ -291,6 +379,53 @@ document.addEventListener('DOMContentLoaded', () => {
             ]
         };
 
+        if (charts.pfVsPjChart) {
+            charts.pfVsPjChart.data = {
+                labels: ['Pessoa Física', 'Pessoa Jurídica'],
+                datasets: [
+                    { label: 'Valor Arrecadado (R$)', data: [contribuinteAnalytics.valorFisico, contribuinteAnalytics.valorJuridico], backgroundColor: colors.teal, barPercentage: 0.6 },
+                    { label: 'Quantidade de DAMs', data: [contribuinteAnalytics.qtdFisico, contribuinteAnalytics.qtdJuridico], backgroundColor: colors.sky, barPercentage: 0.6 }
+                ]
+            };
+        }
+        if (charts.porteChart) {
+            charts.porteChart.data = {
+                labels: contribuinteAnalytics.porte.labels,
+                datasets: [{ data: contribuinteAnalytics.porte.valores, backgroundColor: [colors.indigo, colors.purple, colors.sky, colors.teal] }]
+            };
+        }
+        if (charts.evolucaoTipoContribuinteChart) {
+            charts.evolucaoTipoContribuinteChart.data = {
+                labels: contribuinteAnalytics.evolucaoTipo.labels,
+                datasets: [
+                    { label: 'Pessoa Física', data: contribuinteAnalytics.evolucaoTipo.fisico, borderColor: colors.blue, tension: 0.3 },
+                    { label: 'Pessoa Jurídica', data: contribuinteAnalytics.evolucaoTipo.juridico, borderColor: colors.indigo, tension: 0.3 },
+                ]
+            };
+        }
+
+        // Novos gráficos de Dados Bancários
+        if (charts.arrecadacaoPorBancoChart) {
+            charts.arrecadacaoPorBancoChart.data = {
+                labels: dadosBancarios.arrecadacaoPorBanco.labels,
+                datasets: [
+                    { label: 'Valor Arrecadado', data: dadosBancarios.arrecadacaoPorBanco.valores, backgroundColor: colors.blue, yAxisID: 'y-valor' },
+                    { label: 'Quantidade de DAMs', data: dadosBancarios.arrecadacaoPorBanco.quantidades, backgroundColor: colors.teal, yAxisID: 'y-quantidade' }
+                ]
+            };
+        }
+
+        if (charts.valoresAdicionaisPorBancoChart) {
+             charts.valoresAdicionaisPorBancoChart.data = {
+                labels: dadosBancarios.valoresAdicionaisPorBanco.labels,
+                datasets: [
+                    { label: 'Multa', data: dadosBancarios.valoresAdicionaisPorBanco.multas, backgroundColor: colors.orange },
+                    { label: 'Juros', data: dadosBancarios.valoresAdicionaisPorBanco.juros, backgroundColor: colors.red },
+                    { label: 'Correção Monetária', data: dadosBancarios.valoresAdicionaisPorBanco.correcoes, backgroundColor: colors.purple },
+                ]
+            };
+        }
+
         Object.values(charts).forEach(chart => chart.update());
     };
 
@@ -300,27 +435,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const chartModalCloseBtn = document.getElementById('modal-close-btn');
     const modalTitle = document.getElementById('modal-title');
     const modalTableContainer = document.getElementById('modal-table-container');
-
     const contribuinteModal = document.getElementById('contribuinte-modal');
     const contribuinteModalCloseBtn = document.getElementById('contribuinte-modal-close-btn');
 
     const openChartModal = (chartId) => {
         const originalChart = charts[chartId];
         if (!originalChart) return;
-
-        const chartTitleText = document.querySelector(`[data-chart-id="${chartId}"]`).closest('.chart-article').querySelector('.chart-title span').textContent;
+        const chartTitleElement = document.querySelector(`[data-chart-id="${chartId}"]`);
+        const chartTitleText = chartTitleElement.closest('.chart-article').querySelector('.chart-title span').textContent;
         modalTitle.textContent = chartTitleText;
-
         const modalCanvas = document.getElementById('modal-chart');
         if (modalChart) modalChart.destroy();
-
         modalChart = new Chart(modalCanvas, {
             type: originalChart.config.type,
             data: JSON.parse(JSON.stringify(originalChart.data)), // Deep copy
             options: { ...originalChart.options, maintainAspectRatio: false }
         });
-
-        generateModalTable(originalChart.data);
+        generateModalTable(originalChart.data, originalChart.options);
         chartModal.classList.add('visible');
     };
 
@@ -332,33 +463,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const generateModalTable = (data) => {
+    const generateModalTable = (data, options) => {
         let tableHTML = '<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr>';
-
-        let headers = ['Categoria'];
-        if (data.labels && data.labels.length > 0) {
-             headers = ['Categoria', ...data.datasets.map(d => d.label)];
-        } else {
-             headers = data.datasets.map(d => d.label || 'Valor');
-             headers.unshift('Categoria');
-        }
-
+        const headers = ['Categoria', ...data.datasets.map(d => d.label)];
         headers.forEach(h => tableHTML += `<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${h}</th>`);
         tableHTML += '</tr></thead><tbody class="bg-white divide-y divide-gray-200">';
-
-        if (data.labels && data.labels.length > 0) {
-            data.labels.forEach((label, index) => {
-                tableHTML += `<tr><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${label}</td>`;
-                data.datasets.forEach(dataset => {
-                    const value = dataset.data[index];
-                    const rawValue = typeof value === 'object' && value !== null ? value.y : value;
-                    const formattedValue = !isNaN(rawValue) ? formatCurrency(rawValue) : rawValue;
-                    tableHTML += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedValue}</td>`;
-                });
-                tableHTML += '</tr>';
+        
+        data.labels.forEach((label, index) => {
+            tableHTML += `<tr><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${label}</td>`;
+            data.datasets.forEach(dataset => {
+                const value = dataset.data[index];
+                const rawValue = typeof value === 'object' && value !== null ? value.y : value;
+                const isCurrency = (dataset.label && (dataset.label.toLowerCase().includes('valor') || dataset.label.toLowerCase().includes('r$')));
+                const formattedValue = !isNaN(rawValue) ? (isCurrency ? formatCurrency(rawValue) : formatNumber(rawValue)) : rawValue;
+                tableHTML += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedValue}</td>`;
             });
-        }
-
+            tableHTML += '</tr>';
+        });
+        
         tableHTML += '</tbody></table>';
         modalTableContainer.innerHTML = tableHTML;
     };
@@ -366,25 +488,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const openContribuinteModal = (cnpjCpf, nome) => {
         const contribuinteInfoSpan = document.getElementById('contribuinte-info');
         contribuinteInfoSpan.textContent = `${cnpjCpf} - ${nome}`;
-
         const damsTbody = document.getElementById('dams-contribuinte-tbody');
         damsTbody.innerHTML = '';
-
         const dams = mockData.arrecadacao2024.dams[cnpjCpf] || [];
-        dams.forEach(dam => {
-            damsTbody.innerHTML += `
-                <tr>
-                    <td class="px-4 py-2 text-left text-sm font-medium text-gray-900">${dam.dam}</td>
-                    <td class="px-4 py-2 text-left text-sm text-gray-500">${dam.tributo}</td>
-                    <td class="px-4 py-2 text-left text-sm text-gray-500">${dam.parcela}</td>
-                    <td class="px-4 py-2 text-left text-sm text-gray-500">${formatCurrency(dam.multa)}</td>
-                    <td class="px-4 py-2 text-left text-sm text-gray-500">${formatCurrency(dam.juros)}</td>
-                    <td class="px-4 py-2 text-left text-sm text-gray-500">${formatCurrency(dam.correcao)}</td>
-                    <td class="px-4 py-2 text-left text-sm text-green-500">${formatCurrency(dam.desconto)}</td>
-                    <td class="px-4 py-2 text-left text-sm font-bold text-gray-900">${formatCurrency(dam.total)}</td>
-                </tr>
-            `;
-        });
+        if (dams.length === 0) {
+            damsTbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-gray-500">Nenhum DAM encontrado para este contribuinte.</td></tr>`;
+        } else {
+            dams.forEach(dam => {
+                damsTbody.innerHTML += `
+                    <tr>
+                        <td class="px-4 py-2 text-left text-sm font-medium text-gray-900">${dam.dam}</td>
+                        <td class="px-4 py-2 text-left text-sm text-gray-500">${dam.tributo}</td>
+                        <td class="px-4 py-2 text-left text-sm text-gray-500">${dam.parcela}</td>
+                        <td class="px-4 py-2 text-left text-sm text-gray-500">${formatCurrency(dam.multa)}</td>
+                        <td class="px-4 py-2 text-left text-sm text-gray-500">${formatCurrency(dam.juros)}</td>
+                        <td class="px-4 py-2 text-left text-sm text-gray-500">${formatCurrency(dam.correcao)}</td>
+                        <td class="px-4 py-2 text-left text-sm text-green-500">${formatCurrency(dam.desconto)}</td>
+                        <td class="px-4 py-2 text-left text-sm font-bold text-gray-900">${formatCurrency(dam.total)}</td>
+                    </tr>
+                `;
+            });
+        }
         contribuinteModal.classList.add('visible');
     };
 
@@ -392,14 +516,9 @@ document.addEventListener('DOMContentLoaded', () => {
         contribuinteModal.classList.remove('visible');
     };
 
-
     // -- EVENT LISTENERS --
     document.getElementById('filtro-form').addEventListener('submit', (e) => {
         e.preventDefault();
-        // AQUI: Você deve chamar sua função para buscar os dados reais com base nos filtros
-        // Exemplo: fetchData(getFilters());
-        // Por enquanto, apenas atualizamos a UI com os dados mockados e os filtros
-        console.log("Formulário enviado, gerando dashboard...");
         updateDashboard(mockData[currentDataKey]);
     });
 
@@ -407,11 +526,22 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('filtros-avancados').classList.toggle('hidden');
     });
 
-    document.querySelectorAll('.details-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const chartId = e.currentTarget.dataset.chartId;
-            openChartModal(chartId);
-        });
+    // Event listener delegado para todos os cliques dentro do <main>
+    document.querySelector('main').addEventListener('click', (e) => {
+        // Verifica se o clique foi em um botão de detalhes de gráfico
+        const detailsButton = e.target.closest('.details-btn');
+        if (detailsButton) {
+            const chartId = detailsButton.dataset.chartId;
+            if (chartId) openChartModal(chartId);
+            return;
+        }
+
+        // Verifica se o clique foi em uma linha de tabela clicável
+        const clickableRow = e.target.closest('.table-row-clickable');
+        if (clickableRow && clickableRow.dataset.cnpjCpf) {
+            openContribuinteModal(clickableRow.dataset.cnpjCpf, clickableRow.dataset.nome);
+            return;
+        }
     });
 
     chartModalCloseBtn.addEventListener('click', closeChartModal);
@@ -422,21 +552,6 @@ document.addEventListener('DOMContentLoaded', () => {
     contribuinteModalCloseBtn.addEventListener('click', closeContribuinteModal);
     contribuinteModal.addEventListener('click', (e) => {
         if (e.target === contribuinteModal) closeContribuinteModal();
-    });
-
-    // Adiciona o listener para as linhas das tabelas de ranking
-    const rankingTables = ['top-10-maiores-tbody', 'top-10-menores-tbody'];
-    rankingTables.forEach(tableId => {
-        document.getElementById(tableId).addEventListener('click', (e) => {
-            const row = e.target.closest('tr');
-            if (row) {
-                const cnpjCpf = row.dataset.cnpjCpf;
-                const nome = row.dataset.nome;
-                if (cnpjCpf) {
-                    openContribuinteModal(cnpjCpf, nome);
-                }
-            }
-        });
     });
 
     // -- INICIALIZAÇÃO --
