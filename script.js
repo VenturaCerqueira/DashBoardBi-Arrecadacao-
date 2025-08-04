@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     { nome: 'SUPERMERCADO B S.A.', cnpj_cpf: '22.333.444/0001-55', total: 1800000 },
                     { nome: 'INDÚSTRIA C', cnpj_cpf: '33.444.555/0001-66', total: 1265000 },
                     { nome: 'HOSPITAL D', cnpj_cpf: '44.555.666/0001-77', total: 950000 },
-                    { nome: 'CONSTRUTORA E', cnpj_cpf: '55.666.777/0001-88', total: 880000 },
+                    { nome: 'CONSTRUTora E', cnpj_cpf: '55.666.777/0001-88', total: 880000 },
                     { nome: 'UNIVERSIDADE F', cnpj_cpf: '66.777.888/0001-99', total: 760000 },
                     { nome: 'LOGÍSTICA G', cnpj_cpf: '77.888.999/0001-00', total: 710000 },
                     { nome: 'COMÉRCIO H', cnpj_cpf: '88.999.000/0001-11', total: 665000 },
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     { nome: 'SUPERMERCADO B S.A.', cnpj_cpf: '22.333.444/0001-55', total: 1800000 },
                     { nome: 'INDÚSTRIA C', cnpj_cpf: '33.444.555/0001-66', total: 1265000 },
                     { nome: 'HOSPITAL D', cnpj_cpf: '44.555.666/0001-77', total: 950000 },
-                    { nome: 'CONSTRUTORA E', cnpj_cpf: '55.666.777/0001-88', total: 880000 },
+                    { nome: 'CONSTRUTora E', cnpj_cpf: '55.666.777/0001-88', total: 880000 },
                     { nome: 'UNIVERSIDADE F', cnpj_cpf: '66.777.888/0001-99', total: 760000 },
                     { nome: 'LOGÍSTICA G', cnpj_cpf: '77.888.999/0001-00', total: 710000 },
                     { nome: 'COMÉRCIO H', cnpj_cpf: '88.999.000/0001-11', total: 665000 },
@@ -82,10 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     arrecadado: [13091666, 13091666, 13091666, 13091666, 13091666, 13091670],
                 },
                 efetividadeFaixaValor: {
-                    labels: ['Até R$500', 'R$501 - R$2.000', 'R$2.001 - R$10.000', 'Acima de R$10.000'],
-                    valorArrecadado: [15000000, 25000000, 20550000, 18000000],
-                    taxaArrecadacao: [95, 88, 75, 62],
-                    qtdDams: [55300, 18500, 6200, 1300]
+                    labels: ['Até R$100', 'R$101 - R$200', 'R$201 - R$500', 'R$501 - R$1.000', 'Acima de R$1.000'],
+                    valorArrecadado: [3000000, 5000000, 7000000, 10000000, 53550000],
+                    taxaArrecadacao: [98, 95, 92, 88, 70],
+                    qtdDams: [25000, 20000, 18000, 10000, 8300]
                 },
                 distribuicaoAtraso: { labels: ['1-15 dias', '16-30 dias', '31-60 dias', '61-90 dias', '90+ dias'], qtdDams: [12000, 7500, 3500, 1500, 900] },
                 valorVsAtraso: [ { x: 5, y: 350 }, { x: 35, y: 1500 }, { x: 65, y: 15000 } ],
@@ -140,21 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     labels: ['Distrito Central', 'Distrito Norte', 'Distrito Sul', 'Distrito Leste', 'Distrito Oeste', 'Distrito Rural 1', 'Distrito Rural 2', 'Distrito Rural 3'],
                     valores: [25000000, 18000000, 15000000, 10000000, 5550000, 2500000, 2000000, 5000000],
                 },
-            },
-            dividaAtiva: {
-                kpis: {
-                    damsArrecadados: 12500,
-                    valorArrecadado: 12500000,
-                    contribuintesArrecadados: 8500
-                },
-                arrecadacaoAnual: {
-                    labels: ['2020', '2021', '2022', '2023', '2024'],
-                    valores: [1800000, 2500000, 3800000, 4500000, 12500000],
-                },
-                contribuintesAnual: {
-                    labels: ['2020', '2021', '2022', '2023', '2024'],
-                    quantidades: [1200, 1800, 2500, 3000, 8500],
-                }
             },
             extratos: {
                 kpis: {
@@ -225,9 +210,9 @@ document.addEventListener('DOMContentLoaded', () => {
         faixasData.labels.forEach((label, index) => {
             tableBody.innerHTML += `
                 <tr>
-                    <td class="text-sm font-medium text-gray-900">${label}</td>
-                    <td class="text-sm text-gray-500">${formatCurrency(faixasData.valorArrecadado[index])}</td>
-                    <td class="text-sm text-gray-500">${formatNumber(faixasData.qtdDams[index])}</td>
+                    <td class="text-sm font-medium text-gray-900 px-6 py-4">${label}</td>
+                    <td class="text-sm text-gray-500 px-6 py-4">${formatCurrency(faixasData.valorArrecadado[index])}</td>
+                    <td class="text-sm text-gray-500 px-6 py-4">${formatNumber(faixasData.qtdDams[index])}</td>
                 </tr>`;
         });
     };
@@ -237,7 +222,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('filtro-form');
         const formData = new FormData(form);
 
-        const getSelectedOptions = (id) => Array.from(document.getElementById(id).selectedOptions).map(opt => opt.text);
+        const getSelectedOptions = (id) => {
+            const select = document.getElementById(id);
+            if (select.multiple) {
+                return Array.from(select.selectedOptions).map(opt => opt.text);
+            }
+            return select.selectedIndex !== -1 ? [select.options[select.selectedIndex].text] : [];
+        };
 
         const filters = [
             { id: 'tributo-conta', label: 'Tributos', icon: 'fa-file-invoice-dollar' },
@@ -247,6 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { id: 'setor-economico', label: 'Setor', icon: 'fa-industry' },
             { id: 'banco', label: 'Banco', icon: 'fa-university' },
             { id: 'bairro', label: 'Bairros', icon: 'fa-map-marker-alt' },
+            { id: 'divida-ativa', label: 'Dívida Ativa', icon: 'fa-gavel' },
         ];
 
         infoBar.innerHTML = '';
@@ -317,12 +309,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('kpi-arrecadacao-urbana').textContent = formatCurrency(data.kpis.arrecadacaoUrbana);
     };
     
-    const updateKpisDividaAtiva = (data) => {
-        document.getElementById('kpi-da-dams-arrecadados').textContent = formatNumber(data.kpis.damsArrecadados);
-        document.getElementById('kpi-da-valor-arrecadado').textContent = formatCurrency(data.kpis.valorArrecadado);
-        document.getElementById('kpi-da-contribuintes').textContent = formatNumber(data.kpis.contribuintesArrecadados);
-    };
-    
     const updateKpisExtratos = (data) => {
         document.getElementById('kpi-extratos-emitidos').textContent = formatNumber(data.kpis.extratosEmitidos);
         document.getElementById('kpi-extratos-baixados').textContent = formatNumber(data.kpis.extratosBaixados);
@@ -357,7 +343,6 @@ document.addEventListener('DOMContentLoaded', () => {
         populateRankingTable('top-10-adimplentes-tbody', data.contribuinteAnalytics.topAdimplentes);
         updateKpisBancarios(data.dadosBancarios);
         updateKpisGeograficos(data.dadosGeograficos);
-        updateKpisDividaAtiva(data.dividaAtiva);
         updateKpisExtratos(data.extratos);
     };
 
@@ -395,8 +380,6 @@ document.addEventListener('DOMContentLoaded', () => {
             damsBairroChart: { type: 'bar', options: defaultOptions() },
             arrecadacaoPorSetorChart: { type: 'pie', options: defaultOptions(true) },
             arrecadacaoPorDistritoChart: { type: 'bar', options: defaultOptions(true) },
-            arrecadacaoDAChart: { type: 'line', options: defaultOptions(true) },
-            contribuintesDAChart: { type: 'bar', options: defaultOptions() },
             evolucaoExtratosChart: { type: 'line', options: defaultOptions() },
             extratosStatusValorChart: { type: 'doughnut', options: defaultOptions(true) },
         };
@@ -408,12 +391,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const updateCharts = (data) => {
-        const { kpis, analytics, contribuinteAnalytics, dadosBancarios, dadosGeograficos, dividaAtiva, extratos } = data;
+        const { kpis, analytics, contribuinteAnalytics, dadosBancarios, dadosGeograficos, extratos } = data;
         const colors = { sky: '#0ea5e9', green: '#10b981', red: '#ef4444', orange: '#f97316', purple: '#8b5cf6', teal: '#14b8a6', yellow: '#eab308', indigo: '#4f46e5', blue: '#3b82f6' };
 
         charts.totalValuesChart.data = {
-            labels: ['Emitido', 'Arrecadado', 'Multas', 'Juros', 'Correção Monetária'],
-            datasets: [{ label: 'Valor (R$)', data: [kpis.valorEmitido, kpis.valorArrecadado, kpis.multas, kpis.juros, kpis.correcaoMonetaria], backgroundColor: [colors.sky, colors.green, colors.orange, colors.purple, colors.yellow] }]
+            labels: ['Emitido', 'Arrecadado'],
+            datasets: [{ label: 'Valor (R$)', data: [kpis.valorEmitido, kpis.valorArrecadado], backgroundColor: [colors.sky, colors.green] }]
         };
         charts.monthlyEvolutionChart.data = {
             labels: analytics.evolucaoMensal.labels,
@@ -539,20 +522,6 @@ document.addEventListener('DOMContentLoaded', () => {
              charts.arrecadacaoPorDistritoChart.data = {
                 labels: dadosGeograficos.arrecadacaoPorDistrito.labels,
                 datasets: [{ label: 'Valor Arrecadado (R$)', data: dadosGeograficos.arrecadacaoPorDistrito.valores, backgroundColor: colors.purple, barPercentage: 0.6 }]
-            };
-        }
-        
-        if (charts.arrecadacaoDAChart) {
-            charts.arrecadacaoDAChart.data = {
-                labels: dividaAtiva.arrecadacaoAnual.labels,
-                datasets: [{ label: 'Valor Arrecadado (R$)', data: dividaAtiva.arrecadacaoAnual.valores, borderColor: colors.red, tension: 0.3, fill: true, backgroundColor: `${colors.red}20` }]
-            };
-        }
-
-        if (charts.contribuintesDAChart) {
-            charts.contribuintesDAChart.data = {
-                labels: dividaAtiva.contribuintesAnual.labels,
-                datasets: [{ label: 'Quantidade de Contribuintes', data: dividaAtiva.contribuintesAnual.quantidades, backgroundColor: colors.red }]
             };
         }
         
