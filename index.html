@@ -122,7 +122,7 @@
                     </h2>
                     <hr class="flex-grow border-t border-slate-200">
                 </div>
-                <div id="kpi-gerais" class="gap-4 mb-6"></div>
+                <div id="kpi-gerais" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"></div>
             </section>
 
             <section aria-labelledby="detalhes-contribuinte-title" class="animated-element" style="animation-delay: 0.4s;">
@@ -307,7 +307,7 @@
                         <hr class="flex-grow border-t border-slate-200">
                     </div>
                 
-                    <div id="kpi-contribuinte" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <div id="kpi-contribuinte" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     </div>
                 
                     <div class="ranking-card mt-8">
@@ -374,7 +374,7 @@
                         <hr class="flex-grow border-t border-slate-200">
                     </div>
                 
-                    <div id="kpi-bancarios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                    <div id="kpi-bancarios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                         <div class="kpi-card">
                             <div class="kpi-icon-wrapper bg-yellow-100"><i class="fa-solid fa-coins text-yellow-600"></i></div>
                             <div>
@@ -390,24 +390,31 @@
                             </div>
                         </div>
                         <div class="kpi-card">
-                            <div class="kpi-icon-wrapper bg-orange-100"><i class="fa-solid fa-triangle-exclamation text-orange-600"></i></div>
+                            <div class="kpi-icon-wrapper bg-teal-100"><i class="fa-solid fa-receipt text-teal-600"></i></div>
                             <div>
-                                <div class="kpi-label">Valor Multa por Banco</div>
-                                <div id="kpi-multa-banco" class="kpi-value"></div>
+                                <div class="kpi-label">Tarifa Média por DAM</div>
+                                <div id="kpi-tarifa-media" class="kpi-value"></div>
                             </div>
                         </div>
                         <div class="kpi-card">
-                            <div class="kpi-icon-wrapper bg-purple-100"><i class="fa-solid fa-chart-line text-purple-600"></i></div>
+                            <div class="kpi-icon-wrapper bg-blue-100"><i class="fa-solid fa-rocket text-blue-600"></i></div>
                             <div>
-                                <div class="kpi-label">Valor Juros por Banco</div>
-                                <div id="kpi-juros-banco" class="kpi-value"></div>
+                                <div class="kpi-label">Eficiência Bancária (R$/DAM)</div>
+                                <div id="kpi-eficiencia-bancaria" class="kpi-value"></div>
                             </div>
                         </div>
                         <div class="kpi-card">
-                            <div class="kpi-icon-wrapper bg-teal-100"><i class="fa-solid fa-rotate text-teal-600"></i></div>
+                            <div class="kpi-icon-wrapper bg-sky-100"><i class="fa-solid fa-pie-chart text-sky-600"></i></div>
                             <div>
-                                <div class="kpi-label">Valor Correção por Banco</div>
-                                <div id="kpi-correcao-banco" class="kpi-value"></div>
+                                <div class="kpi-label">Participação no Total Arrecadado</div>
+                                <div id="kpi-participacao-total" class="kpi-value"></div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon-wrapper bg-purple-100"><i class="fa-solid fa-clock text-purple-600"></i></div>
+                            <div>
+                                <div class="kpi-label">Tempo Médio de Compensação</div>
+                                <div id="kpi-tempo-compensacao" class="kpi-value"></div>
                             </div>
                         </div>
                     </div>
@@ -448,17 +455,17 @@
                 
                     <div id="kpi-geografico" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <div class="kpi-card">
-                            <div class="kpi-icon-wrapper bg-sky-100"><i class="fa-solid fa-location-dot text-sky-600"></i></div>
+                            <div class="kpi-icon-wrapper bg-green-100"><i class="fa-solid fa-tree text-green-600"></i></div>
                             <div>
-                                <div class="kpi-label">Bairros com Arrecadação</div>
-                                <div id="kpi-qtd-bairros" class="kpi-value"></div>
+                                <div class="kpi-label">Quantidade Zona Rural</div>
+                                <div id="kpi-qtd-zona-rural" class="kpi-value"></div>
                             </div>
                         </div>
                         <div class="kpi-card">
                             <div class="kpi-icon-wrapper bg-indigo-100"><i class="fa-solid fa-city text-indigo-600"></i></div>
                             <div>
-                                <div class="kpi-label">Distritos com Arrecadação</div>
-                                <div id="kpi-qtd-distritos" class="kpi-value"></div>
+                                <div class="kpi-label">Quantidade Zona Urbana</div>
+                                <div id="kpi-qtd-zona-urbana" class="kpi-value"></div>
                             </div>
                         </div>
                         <div class="kpi-card">

@@ -62,16 +62,6 @@ header p { font-size: var(--font-base); }
 }
 
 /* --- AJUSTE DE RESPONSIVIDADE PARA GRIDS --- */
-#kpi-gerais {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-}
-#kpi-contribuinte {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Ajustado para 3 colunas */
-}
 .responsive-grid {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }

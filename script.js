@@ -95,9 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 kpis: {
                     valorTarifaTotal: 150000,
                     custoPercentual: (150000 / 78550000) * 100,
-                    valorMultaPorBanco: 850000,
-                    valorJurosPorBanco: 1200000,
-                    valorCorrecaoPorBanco: 1200000,
+                    tempoMedioCompensacao: { 'Banco do Brasil': 1.2, 'Caixa Econômica': 2.1, 'Itaú': 1.8, 'Outros': 3.0 },
                 },
                 arrecadacaoPorBanco: {
                     labels: ['Banco do Brasil', 'Caixa Econômica', 'Itaú', 'Outros'],
@@ -294,17 +292,45 @@ document.addEventListener('DOMContentLoaded', () => {
         kpiContainer.innerHTML = kpisContribuinte.map((kpi, i) => createKpiCard({ ...kpi, delay: i })).join('');
     };
 
-    const updateKpisBancarios = (data) => {
+    const updateKpisBancarios = (data, kpisGerais) => {
+        // Indicadores existentes
         document.getElementById('kpi-tarifa-total').textContent = formatCurrency(data.kpis.valorTarifaTotal);
         document.getElementById('kpi-custo-percentual').textContent = `${data.kpis.custoPercentual.toFixed(2)}%`;
-        document.getElementById('kpi-multa-banco').textContent = formatCurrency(data.kpis.valorMultaPorBanco);
-        document.getElementById('kpi-juros-banco').textContent = formatCurrency(data.kpis.valorJurosPorBanco);
-        document.getElementById('kpi-correcao-banco').textContent = formatCurrency(data.kpis.valorCorrecaoPorBanco);
+    
+        // 1. Tarifa Média por DAM
+        const totalDamsArrecadados = kpisGerais.damsArrecadados;
+        const tarifaMedia = data.kpis.valorTarifaTotal / totalDamsArrecadados;
+        document.getElementById('kpi-tarifa-media').textContent = `${formatCurrency(tarifaMedia)} por DAM`;
+    
+        // 2. Eficiência Bancária (R$/DAM)
+        const eficiencias = data.arrecadacaoPorBanco.labels.map((banco, i) => ({
+            nome: banco,
+            valor: data.arrecadacaoPorBanco.valores[i] / data.arrecadacaoPorBanco.quantidades[i]
+        }));
+        const maisEficiente = eficiencias.reduce((prev, current) => (prev.valor > current.valor) ? prev : current);
+        document.getElementById('kpi-eficiencia-bancaria').textContent = `${maisEficiente.nome.split(' ')[0]} – ${formatCurrency(maisEficiente.valor)}/DAM`;
+    
+        // 3. Participação no Total Arrecadado (%)
+        const totalArrecadado = kpisGerais.valorArrecadado;
+        const participacoes = data.arrecadacaoPorBanco.labels.map((banco, i) => ({
+            nome: banco,
+            percentual: (data.arrecadacaoPorBanco.valores[i] / totalArrecadado) * 100
+        }));
+        const maiorParticipacao = participacoes.reduce((prev, current) => (prev.percentual > current.percentual) ? prev : current);
+        document.getElementById('kpi-participacao-total').textContent = `${maiorParticipacao.nome.split(' ')[0]}: ${maiorParticipacao.percentual.toFixed(1)}% do total`;
+    
+        // 4. Tempo Médio de Compensação Bancária
+        const tempos = Object.entries(data.kpis.tempoMedioCompensacao).map(([banco, dias]) => ({ banco, dias }));
+        const menorTempo = tempos.reduce((prev, current) => (prev.dias < current.dias) ? prev : current);
+        document.getElementById('kpi-tempo-compensacao').textContent = `Menor: ${menorTempo.banco.split(' ')[0]} (${menorTempo.dias.toFixed(1)} dias)`;
     };
 
     const updateKpisGeograficos = (data) => {
-        document.getElementById('kpi-qtd-bairros').textContent = formatNumber(data.kpis.qtdBairros);
-        document.getElementById('kpi-qtd-distritos').textContent = formatNumber(data.kpis.qtdDistritos);
+        // The data source for quantities is in arrecadacaoPorZona
+        // data.arrecadacaoPorZona.labels is ['Urbana', 'Rural']
+        // data.arrecadacaoPorZona.quantidades is [68000, 13300]
+        document.getElementById('kpi-qtd-zona-urbana').textContent = formatNumber(data.arrecadacaoPorZona.quantidades[0]);
+        document.getElementById('kpi-qtd-zona-rural').textContent = formatNumber(data.arrecadacaoPorZona.quantidades[1]);
         document.getElementById('kpi-arrecadacao-rural').textContent = formatCurrency(data.kpis.arrecadacaoRural);
         document.getElementById('kpi-arrecadacao-urbana').textContent = formatCurrency(data.kpis.arrecadacaoUrbana);
     };
@@ -341,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         updateContribuinteKpis(data.contribuinteAnalytics);
         populateRankingTable('top-10-adimplentes-tbody', data.contribuinteAnalytics.topAdimplentes);
-        updateKpisBancarios(data.dadosBancarios);
+        updateKpisBancarios(data.dadosBancarios, data.kpis);
         updateKpisGeograficos(data.dadosGeograficos);
         updateKpisExtratos(data.extratos);
     };
