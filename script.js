@@ -4,6 +4,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const charts = {};
     let modalChart = null;
 
+    /**
+     * Clona um objeto profundamente, incluindo objetos aninhados, arrays e funções.
+     * @param {any} obj O objeto a ser clonado.
+     * @returns {any} Uma cópia profunda do objeto.
+     */
+    const deepClone = (obj) => {
+        if (obj === null || typeof obj !== 'object') {
+            return obj;
+        }
+
+        if (obj instanceof Date) {
+            return new Date(obj.getTime());
+        }
+
+        if (Array.isArray(obj)) {
+            return obj.map(item => deepClone(item));
+        }
+
+        const newObj = {};
+        for (const key in obj) {
+            // Usando Object.prototype.hasOwnProperty.call para segurança
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                newObj[key] = deepClone(obj[key]);
+            }
+        }
+        return newObj;
+    };
+
+
     // Funções de formatação
     const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
     const formatNumber = (value) => new Intl.NumberFormat('pt-BR').format(value);
@@ -293,42 +322,34 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const updateKpisBancarios = (data, kpisGerais) => {
-        // Indicadores existentes
         document.getElementById('kpi-tarifa-total').textContent = formatCurrency(data.kpis.valorTarifaTotal);
         document.getElementById('kpi-custo-percentual').textContent = `${data.kpis.custoPercentual.toFixed(2)}%`;
     
-        // 1. Tarifa Média por DAM
         const totalDamsArrecadados = kpisGerais.damsArrecadados;
-        const tarifaMedia = data.kpis.valorTarifaTotal / totalDamsArrecadados;
+        const tarifaMedia = totalDamsArrecadados > 0 ? data.kpis.valorTarifaTotal / totalDamsArrecadados : 0;
         document.getElementById('kpi-tarifa-media').textContent = `${formatCurrency(tarifaMedia)} por DAM`;
     
-        // 2. Eficiência Bancária (R$/DAM)
         const eficiencias = data.arrecadacaoPorBanco.labels.map((banco, i) => ({
             nome: banco,
-            valor: data.arrecadacaoPorBanco.valores[i] / data.arrecadacaoPorBanco.quantidades[i]
+            valor: data.arrecadacaoPorBanco.quantidades[i] > 0 ? data.arrecadacaoPorBanco.valores[i] / data.arrecadacaoPorBanco.quantidades[i] : 0
         }));
         const maisEficiente = eficiencias.reduce((prev, current) => (prev.valor > current.valor) ? prev : current);
         document.getElementById('kpi-eficiencia-bancaria').textContent = `${maisEficiente.nome.split(' ')[0]} – ${formatCurrency(maisEficiente.valor)}/DAM`;
     
-        // 3. Participação no Total Arrecadado (%)
         const totalArrecadado = kpisGerais.valorArrecadado;
         const participacoes = data.arrecadacaoPorBanco.labels.map((banco, i) => ({
             nome: banco,
-            percentual: (data.arrecadacaoPorBanco.valores[i] / totalArrecadado) * 100
+            percentual: totalArrecadado > 0 ? (data.arrecadacaoPorBanco.valores[i] / totalArrecadado) * 100 : 0
         }));
         const maiorParticipacao = participacoes.reduce((prev, current) => (prev.percentual > current.percentual) ? prev : current);
         document.getElementById('kpi-participacao-total').textContent = `${maiorParticipacao.nome.split(' ')[0]}: ${maiorParticipacao.percentual.toFixed(1)}% do total`;
     
-        // 4. Tempo Médio de Compensação Bancária
         const tempos = Object.entries(data.kpis.tempoMedioCompensacao).map(([banco, dias]) => ({ banco, dias }));
         const menorTempo = tempos.reduce((prev, current) => (prev.dias < current.dias) ? prev : current);
         document.getElementById('kpi-tempo-compensacao').textContent = `Menor: ${menorTempo.banco.split(' ')[0]} (${menorTempo.dias.toFixed(1)} dias)`;
     };
 
     const updateKpisGeograficos = (data) => {
-        // The data source for quantities is in arrecadacaoPorZona
-        // data.arrecadacaoPorZona.labels is ['Urbana', 'Rural']
-        // data.arrecadacaoPorZona.quantidades is [68000, 13300]
         document.getElementById('kpi-qtd-zona-urbana').textContent = formatNumber(data.arrecadacaoPorZona.quantidades[0]);
         document.getElementById('kpi-qtd-zona-rural').textContent = formatNumber(data.arrecadacaoPorZona.quantidades[1]);
         document.getElementById('kpi-arrecadacao-rural').textContent = formatCurrency(data.kpis.arrecadacaoRural);
@@ -412,7 +433,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (const [id, config] of Object.entries(chartConfigs)) {
             const canvas = document.getElementById(id);
-            if (canvas) charts[id] = new Chart(canvas, { type: config.type, data: {}, options: config.options });
+            if (canvas) {
+                // **MUDANÇA APLICADA AQUI**
+                // Guardamos a configuração original (pura) antes de criar o gráfico.
+                charts[id] = new Chart(canvas, {
+                    type: config.type,
+                    data: {},
+                    options: deepClone(config.options) // Usamos uma cópia profunda para a instância do gráfico
+                });
+                // Armazenamos a configuração pura para ser usada depois pela modal.
+                charts[id].pristineConfig = config;
+            }
         }
     };
 
@@ -420,11 +451,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const { kpis, analytics, contribuinteAnalytics, dadosBancarios, dadosGeograficos, extratos } = data;
         const colors = { sky: '#0ea5e9', green: '#10b981', red: '#ef4444', orange: '#f97316', purple: '#8b5cf6', teal: '#14b8a6', yellow: '#eab308', indigo: '#4f46e5', blue: '#3b82f6' };
 
-        charts.totalValuesChart.data = {
+        if(charts.totalValuesChart) charts.totalValuesChart.data = {
             labels: ['Emitido', 'Arrecadado'],
             datasets: [{ label: 'Valor (R$)', data: [kpis.valorEmitido, kpis.valorArrecadado], backgroundColor: [colors.sky, colors.green] }]
         };
-        charts.monthlyEvolutionChart.data = {
+        if(charts.monthlyEvolutionChart) charts.monthlyEvolutionChart.data = {
             labels: analytics.evolucaoMensal.labels,
             datasets: [
                 { label: 'Emitido', data: analytics.evolucaoMensal.emitido, borderColor: colors.sky, tension: 0.3 },
@@ -433,10 +464,13 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const taxaArrecadacao = kpis.taxaArrecadacao;
-        charts.collectionPercentageChart.data = { datasets: [{ data: [taxaArrecadacao, 100 - taxaArrecadacao], backgroundColor: [colors.green, '#e2e8f0'], borderWidth: 0 }] };
+        if(charts.collectionPercentageChart) charts.collectionPercentageChart.data = {
+            labels: ['Arrecadado', 'Não Arrecadado'],
+            datasets: [{ data: [taxaArrecadacao, 100 - taxaArrecadacao], backgroundColor: [colors.green, '#e2e8f0'], borderWidth: 0 }]
+        };
         document.getElementById('gauge-text').innerHTML = `<div class="text-3xl lg:text-4xl font-bold text-slate-800">${taxaArrecadacao.toFixed(1)}%</div><div class="text-sm text-slate-500">do valor emitido</div>`;
 
-        charts.effectivenessByValueRangeChart.data = {
+        if(charts.effectivenessByValueRangeChart) charts.effectivenessByValueRangeChart.data = {
             labels: analytics.efetividadeFaixaValor.labels,
             datasets: [
                 { type: 'bar', label: 'Valor Arrecadado (R$)', data: analytics.efetividadeFaixaValor.valorArrecadado, backgroundColor: `${colors.teal}80`, yAxisID: 'y' },
@@ -445,22 +479,22 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const damsPagosDia = kpis.damsArrecadados - kpis.damsPagosAtraso;
-        charts.damsPaidStatusChart.data = {
+        if(charts.damsPaidStatusChart) charts.damsPaidStatusChart.data = {
             labels: [`Pagos em Dia (${formatNumber(damsPagosDia)})`, `Pagos com Atraso (${formatNumber(kpis.damsPagosAtraso)})`],
             datasets: [{ data: [damsPagosDia, kpis.damsPagosAtraso], backgroundColor: [colors.green, colors.orange] }]
         };
-        charts.delayDistributionChart.data = {
+        if(charts.delayDistributionChart) charts.delayDistributionChart.data = {
             labels: analytics.distribuicaoAtraso.labels,
             datasets: [{ label: 'Quantidade de DAMs', data: analytics.distribuicaoAtraso.qtdDams, backgroundColor: colors.orange }]
         };
-        charts.revenueCompositionChart.data = {
+        if(charts.revenueCompositionChart) charts.revenueCompositionChart.data = {
             labels: ['Principal', 'Multas', 'Juros', 'Correção Monetária'],
             datasets: [{ data: [kpis.valorArrecadado - kpis.multas - kpis.juros, kpis.multas, kpis.juros, kpis.correcaoMonetaria], backgroundColor: [colors.teal, colors.orange, colors.purple, colors.yellow] }]
         };
-        charts.valueVsDelayScatterChart.data = { datasets: [{ label: 'DAM', data: analytics.valorVsAtraso, backgroundColor: `${colors.red}B3` }] };
+        if(charts.valueVsDelayScatterChart) charts.valueVsDelayScatterChart.data = { datasets: [{ label: 'DAM', data: analytics.valorVsAtraso, backgroundColor: `${colors.red}B3` }] };
 
         const damsNaoPagos = analytics.damsStatusMensal.emitidos.map((e, i) => e - (analytics.damsStatusMensal.pagosDia[i] + analytics.damsStatusMensal.pagosAtraso[i]));
-        charts.monthlyDamStatusChart.data = {
+        if(charts.monthlyDamStatusChart) charts.monthlyDamStatusChart.data = {
             labels: analytics.damsStatusMensal.labels,
             datasets: [
                 { label: 'Pago em Dia', data: analytics.damsStatusMensal.pagosDia, backgroundColor: colors.green },
@@ -568,7 +602,9 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
-        Object.values(charts).forEach(chart => chart.update());
+        Object.values(charts).forEach(chart => {
+            if (chart) chart.update();
+        });
     };
 
     const chartModal = document.getElementById('chart-modal');
@@ -579,10 +615,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const contribuinteModal = document.getElementById('contribuinte-modal');
     const contribuinteModalCloseBtn = document.getElementById('contribuinte-modal-close-btn');
 
-    // --- FUNÇÃO CORRIGIDA E ROBUSTA ---
     const generateModalTable = (originalChart) => {
-        const { data, config } = originalChart;
-        const type = config.type;
+        const { data, pristineConfig } = originalChart;
+        const type = pristineConfig.type;
 
         let tableHTML = '<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr>';
         let headers = [];
@@ -612,18 +647,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 tableHTML += '</tr></thead><tbody class="bg-white divide-y divide-gray-200">';
                 
                 if (data.labels && data.datasets[0] && data.datasets[0].data) {
-                    // Heurística simples para decidir se os dados são monetários
-                    const isCurrencyData = data.datasets[0].data.some(v => v > 1000) && !originalChart.options.plugins?.tooltip?.enabled === false;
+                    const isCurrencyData = data.datasets[0].data.some(v => v > 1000) && !pristineConfig.options.plugins?.tooltip?.enabled === false;
                     data.labels.forEach((label, index) => {
                         const value = data.datasets[0].data[index];
-                        const formattedValue = isCurrencyData ? formatCurrency(value) : formatNumber(value);
+                        let formattedValue = isCurrencyData ? formatCurrency(value) : formatNumber(value);
+                        
+                        if (originalChart.canvas.id === 'collectionPercentageChart') {
+                            formattedValue = `${value.toFixed(1)}%`;
+                        }
+                        
                         rowsHTML += `<tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${label}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">${formattedValue}</td>
                         </tr>`;
                     });
                 }
-            } else { // Para gráficos de Barra, Linha, etc.
+            } else { 
                 if (!data.labels) throw new Error("Rótulos (labels) ausentes para este tipo de gráfico.");
 
                 headers = ['Categoria', ...data.datasets.map(d => d.label || '')];
@@ -653,33 +692,45 @@ document.addEventListener('DOMContentLoaded', () => {
             tableHTML += rowsHTML + '</tbody></table>';
         } catch (e) {
             console.error("Erro ao gerar tabela para o gráfico:", originalChart.canvas.id, e);
-            tableHTML = `<div class="p-4 text-center text-red-500">Ocorreu um erro ao gerar a tabela de dados.</div>`;
+            tableHTML = `<div class="p-4 text-center text-red-500">Ocorreu um erro ao gerar a tabela de dados. Verifique o console para mais detalhes.</div>`;
         }
 
         modalTableContainer.innerHTML = tableHTML;
     };
 
-
     const openChartModal = (chartId) => {
-        const originalChart = charts[chartId];
-        if (!originalChart) return;
+        try {
+            const originalChart = charts[chartId];
+            if (!originalChart || !originalChart.pristineConfig) {
+                console.error(`Gráfico ou configuração pura com ID '${chartId}' não encontrado.`);
+                return;
+            }
 
-        const chartTitleElement = document.querySelector(`[data-chart-id="${chartId}"]`);
-        const chartTitleText = chartTitleElement.closest('.chart-article').querySelector('.chart-title span').textContent;
-        modalTitle.textContent = chartTitleText;
+            const chartTitleElement = document.querySelector(`[data-chart-id="${chartId}"]`);
+            const chartTitleText = chartTitleElement.closest('.chart-article').querySelector('.chart-title span').textContent;
+            modalTitle.textContent = chartTitleText;
 
-        const modalCanvas = document.getElementById('modal-chart');
-        if (modalChart) modalChart.destroy();
+            const modalCanvas = document.getElementById('modal-chart');
+            if (modalChart) modalChart.destroy();
+            
+            // **MUDANÇA APLICADA AQUI**
+            // Usando deepClone na configuração original e pura, não na instância "viva".
+            const newOptions = deepClone(originalChart.pristineConfig.options);
+            newOptions.maintainAspectRatio = false;
 
-        modalChart = new Chart(modalCanvas, {
-            type: originalChart.config.type,
-            data: JSON.parse(JSON.stringify(originalChart.data)),
-            options: { ...originalChart.options, maintainAspectRatio: false }
-        });
-        
-        generateModalTable(originalChart);
-        
-        chartModal.classList.add('visible');
+            modalChart = new Chart(modalCanvas, {
+                type: originalChart.pristineConfig.type,
+                data: deepClone(originalChart.data),
+                options: newOptions 
+            });
+            
+            generateModalTable(originalChart);
+            
+            chartModal.classList.add('visible');
+        } catch (error) {
+            console.error(`Falha ao abrir a modal para o gráfico '${chartId}':`, error);
+            alert(`Ocorreu um erro ao tentar abrir os detalhes do gráfico. Verifique o console (F12) para mais informações.`);
+        }
     };
 
     const closeChartModal = () => {
